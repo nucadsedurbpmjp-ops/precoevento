@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cálculo do Preço Público para Permissão de Uso da União</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #0056b3;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="number"], select {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #e9f7ef;
+            border: 1px solid #d4edda;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #155724;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        .info {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 20px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cálculo do Preço Público</h1>
+        <h2>Permissão de Uso de Área da União para Eventos na Orla de João Pessoa</h2>
+	<h3 style="text-align: center">Conforme a Portaria nº 01, de 03 de janeiro de 2014, da Secretaria de Patrimônio da União (SPU) </h3>
+        
+        <div class="form-group">
+            <label for="vef">Valor do Espaço Físico (Vef) por m² (R$):</label>
+            <input type="number" id="vef" step="0.01" value="" min="0">
+        </div>
+        
+        <div class="form-group">
+            <label for="area">Área de Utilização (A) em m²:</label>
+            <input type="number" id="area" step="0.01" value="" min="0">
+        </div>
+        
+        <div class="form-group">
+            <label for="dias">Número de Dias de Utilização (Nd):</label>
+            <input type="number" id="dias" step="0.01" value="" min="0">
+        </div>
+        
+        <div class="form-group">
+            <label for="ft">Fator de Uso (Ft):</label>
+            <select id="ft">
+                <option value="1.00">1,00 - Uso por ente público/privado SEM exploração econômica E SEM restrição de acesso.</option>
+                <option value="1.00">1,00 - Uso por ente privado SEM exploração econômica E COM restrição de acesso.</option>
+                <option value="1.50">1,50 - Uso por ente privado COM exploração econômica E SEM restrição de acesso.</option>
+                <option value="2.00" selected>2,00 - Uso por ente público/privado COM exploração econômica E COM restrição de acesso.</option>
+            </select>
+        </div>
+        
+        <button onclick="calcularPrecoPublico()">Calcular Preço Público</button>
+        
+        <div id="resultado" class="result" style="display: none;"></div>
+        <div id="erro" class="error" style="display: none;"></div>
+
+        <p class="info">
+            Este cálculo é baseado na fórmula **Vpu = [(Vef x A x 0,01) x (Nd/90)] x Ft.<br/>
+            O valor do espaço físico (Vef) pode ser obtido da Planta de Valores Genéricos (PVG) ou por pesquisa de mercado/avaliação, conforme Art. 8º, §1º, §3º e §4º da Portaria nº 01/2014 da SPU.<br/>
+            Considera o valor mínimo de R$ 500,00 conforme Art. 8º, §9º da Portaria nº 01/2014 da SPU.<br/>
+            "Exploração econômica/comercial" refere-se a atividades com marcas/patrocínio privado ou comercialização de produtos/serviços.<br/>
+            "Restrição de acesso" refere-se à comercialização de ingresso, pagamento de inscrição ou exigência de convite específico.<br/>
+        </p>
+    </div>
+
+    <script>
+        function calcularPrecoPublico() {
+            const vefInput = document.getElementById('vef');
+            const areaInput = document.getElementById('area');
+            const diasInput = document.getElementById('dias');
+            const ftSelect = document.getElementById('ft'); // Mudança aqui
+            const resultadoDiv = document.getElementById('resultado');
+            const erroDiv = document.getElementById('erro');
+
+            resultadoDiv.style.display = 'none';
+            erroDiv.style.display = 'none';
+            erroDiv.textContent = '';
+
+            const vef = parseFloat(vefInput.value);
+            const area = parseFloat(areaInput.value);
+            const dias = parseFloat(diasInput.value);
+            const ft = parseFloat(ftSelect.value); // Mudança aqui
+
+            // Validação dos inputs
+            if (isNaN(vef) || isNaN(area) || isNaN(dias) || isNaN(ft) || vef < 0 || area < 0 || dias < 0 || ft < 0) {
+                erroDiv.textContent = 'Por favor, insira valores numéricos válidos e positivos em todos os campos.';
+                erroDiv.style.display = 'block';
+                return;
+            }
+
+            // A fórmula de cálculo do preço público é: Vpu = [(Vef x A x 0,01) x (Nd/90)] x Ft
+            let vpu = ((vef * area * 0.01) * (dias / 90)) * ft;
+
+            // Considera o valor mínimo admitido para os casos de permissão de uso onerosa, que é de R$ 500,00.
+            const valorMinimo = 500.00; // [5, 6]
+            if (vpu < valorMinimo) {
+                vpu = valorMinimo;
+                resultadoDiv.textContent = `O Valor do Preço Público calculado foi inferior ao mínimo. Será cobrado o valor mínimo de: ${vpu.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`;
+            } else {
+                resultadoDiv.textContent = `Valor do Preço Público (Vpu): ${vpu.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`;
+            }
+            
+            resultadoDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
